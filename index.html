@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netline · Centro de Reportes</title>
+<style>
+  :root{--navy:#1F3A5F;--navy2:#2C5282;--teal:#2E8B8B;--ink:#1a2233;--muted:#6b7686;--line:#e5e9f0;--bg:#f4f6f9;--card:#fff;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding:40px 20px 80px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{border-bottom:3px solid var(--navy);padding-bottom:20px;margin-bottom:6px}
+  .eyebrow{color:var(--teal);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+  h1{font-size:32px;color:var(--navy);margin:6px 0 4px;font-weight:800;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:14px}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:26px 0 14px;flex-wrap:wrap}
+  .search{flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:600}
+  .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-top:8px}
+  .rep{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:0 1px 2px rgba(20,30,50,.05);transition:transform .12s,box-shadow .12s}
+  .rep:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,30,50,.10);border-color:#cfd8e6}
+  .cat{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px;letter-spacing:.03em}
+  .rep h3{font-size:17px;color:var(--navy);margin:12px 0 6px;font-weight:750;line-height:1.25}
+  .rep p{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+  .open{color:var(--navy2);font-weight:700}
+  .empty{color:var(--muted);font-size:14px;padding:30px 0}
+  footer{color:var(--muted);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Netline · Dirección de Administración y Finanzas</div>
+    <h1>Centro de Reportes</h1>
+    <div class="sub">Informes y análisis publicados · actualizado periódicamente</div>
+  </header>
+
+  <div class="toolbar">
+    <input class="search" id="q" placeholder="Buscar reporte…">
+    <div id="chips"></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">No hay reportes que coincidan con la búsqueda.</div>
+
+  <footer>Netline · Centro de Reportes. Para agregar un nuevo informe: sube su archivo a la carpeta <code>reportes/</code> y añade una entrada en la lista <code>REPORTES</code> de este index.html.</footer>
+</div>
+
+<script>
+// ===== Lista de reportes — agrega aquí cada informe nuevo =====
+const REPORTES = [
+  {
+    titulo: "Resumen Ejecutivo de Financiamiento",
+    desc: "Cartera de obligaciones, deuda tomada por año, servicio de deuda, intereses, vencimientos y pagos por institución.",
+    categoria: "Finanzas",
+    fecha: "2026-07-31",
+    archivo: "reportes/resumen-financiamiento-jul2026.html"
+  },
+  // { titulo:"...", desc:"...", categoria:"...", fecha:"AAAA-MM-DD", archivo:"reportes/archivo.html" },
+];
+// ==============================================================
+
+const mesesES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fechaFmt(iso){const d=iso.split('-');return `${d[2]}-${mesesES[+d[1]-1]}-${d[0]}`;}
+const grid=document.getElementById('grid'), empty=document.getElementById('empty');
+const cats=[...new Set(REPORTES.map(r=>r.categoria))];
+let activeCat='Todos', q='';
+
+const chips=document.getElementById('chips');
+['Todos',...cats].forEach(c=>{
+  const b=document.createElement('button'); b.className='chip'+(c==='Todos'?' active':''); b.textContent=c;
+  b.onclick=()=>{activeCat=c;[...chips.children].forEach(x=>x.classList.remove('active'));b.classList.add('active');render();};
+  chips.appendChild(b);
+});
+document.getElementById('q').addEventListener('input',e=>{q=e.target.value.toLowerCase();render();});
+
+function render(){
+  grid.innerHTML='';
+  const list=REPORTES
+    .filter(r=>activeCat==='Todos'||r.categoria===activeCat)
+    .filter(r=>!q||(r.titulo+r.desc+r.categoria).toLowerCase().includes(q))
+    .sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  empty.style.display=list.length?'none':'block';
+  list.forEach(r=>{
+    const a=document.createElement('a'); a.className='rep'; a.href=r.archivo; a.target='_blank'; a.rel='noopener';
+    a.innerHTML=`<span class="cat">${r.categoria}</span>
+      <h3>${r.titulo}</h3><p>${r.desc}</p>
+      <div class="meta"><span>Corte ${fechaFmt(r.fecha)}</span><span class="open">Abrir informe →</span></div>`;
+    grid.appendChild(a);
+  });
+}
+render();
+</script>
+</body>
+</html>
+
