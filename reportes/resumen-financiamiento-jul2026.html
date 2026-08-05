@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netline — Resumen Ejecutivo de Financiamiento</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --navy2:#2C5282; --teal:#2E8B8B; --teal2:#3BA7A7;
+    --amber:#E8A33D; --green:#4C9A6B; --red:#C0504D; --violet:#7E6BA8;
+    --ink:#1a2233; --muted:#6b7686; --line:#e5e9f0; --bg:#f4f6f9; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;padding:32px 20px 60px}
+  .wrap{max-width:1160px;margin:0 auto}
+  header{border-bottom:3px solid var(--navy);padding-bottom:16px;margin-bottom:8px}
+  .eyebrow{color:var(--teal);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+  h1{font-size:30px;color:var(--navy);margin:4px 0 2px;font-weight:800;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13px}
+  h2{font-size:17px;color:var(--navy);margin:34px 0 4px;font-weight:750}
+  h2 .n{color:var(--teal);font-weight:800;margin-right:8px}
+  .note{color:var(--muted);font-size:12px;margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 16px 14px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  .kpi .v{font-size:26px;font-weight:800;color:var(--navy);letter-spacing:-.5px}
+  .kpi .l{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+  .kpi .d{font-size:11px;font-weight:700;margin-top:6px}
+  .up{color:var(--red)} .down{color:var(--green)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .grid2c{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .insights{background:linear-gradient(180deg,#fbfcfe,#f7f9fc);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:18px 22px;margin-top:10px}
+  .insights li{margin:9px 0 9px 2px;font-size:13.5px;list-style:none;padding-left:22px;position:relative}
+  .insights li:before{content:"▸";color:var(--teal);position:absolute;left:0;font-weight:800}
+  .insights b{color:var(--navy)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none;font-weight:800;color:var(--navy)}
+  .foot{color:var(--muted);font-size:11px;margin-top:30px;border-top:1px solid var(--line);padding-top:12px}
+  svg text{font-family:inherit}
+  .chtitle{font-size:13.5px;font-weight:750;color:var(--ink)}
+  .pill{display:inline-block;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+  .chsub{font-size:11.5px;color:var(--muted);margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Netline · Dirección de Administración y Finanzas</div>
+    <h1>Resumen Ejecutivo de Financiamiento</h1>
+    <div class="sub">Cartera de obligaciones financieras · corte 31-jul-2026 · cifras en millones de CLP (MM) salvo indicación</div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <h2><span class="n">01</span>Deuda tomada por año — instituciones financieras</h2>
+  <div class="note">Monto original de nuevas operaciones con bancos/leasing por año de originación. Los préstamos de socios se analizan aparte (sección 05).</div>
+  <div class="card"><div class="chtitle">Nuevas colocaciones por año y tipo (MM CLP)</div><div class="chsub">Stack por tipo de producto</div><div id="c_tomada"></div><div class="legend" id="leg_tomada"></div></div>
+
+  <div class="grid2" style="margin-top:22px">
+    <div class="card"><div class="chtitle">Servicio de deuda pagado por año</div><div class="chsub">Capital amortizado e intereses pagados — instituciones (MM)</div><div id="c_serv"></div><div class="legend" id="leg_serv"></div></div>
+    <div class="card"><div class="chtitle">Perfil de vencimientos de capital</div><div class="chsub">Capital por vencer — instituciones, post jul-2026 (MM)</div><div id="c_mat"></div></div>
+  </div>
+
+  <h2><span class="n">02</span>Composición de la cartera vigente</h2>
+  <div class="note">Saldo de capital al 31-jul-2026 según el Resumen actualizado (incluye socios con capitalización).</div>
+  <div class="grid2c">
+    <div class="card"><div class="chtitle">Por tipo de obligación (MM · % del total)</div><div class="chsub">Total cartera $<span id="tot1"></span> MM</div><div id="c_tipo"></div><div class="legend" id="leg_tipo"></div></div>
+    <div class="card"><div class="chtitle">Por institución / acreedor (MM)</div><div class="chsub">Saldo vigente — top acreedores</div><div id="c_inst"></div></div>
+  </div>
+
+  <h2><span class="n">03</span>Costo financiero — intereses (instituciones)</h2>
+  <div class="grid2c">
+    <div class="card"><div class="chtitle">Interés total comprometido en la vida de los créditos</div><div class="chsub">Pagado a la fecha vs. por pagar (MM)</div><div id="c_int"></div><div class="legend" id="leg_int"></div></div>
+    <div class="card" id="obscard"><div class="chtitle">Lectura rápida</div><div id="quick"></div></div>
+  </div>
+
+  <h2><span class="n">04</span>Hallazgos y recomendaciones</h2>
+  <ul class="insights" id="insights"></ul>
+
+  <h2><span class="n">05</span>Préstamos de socios — nota</h2>
+  <div class="card">
+    <p style="font-size:13px">Los préstamos de socios ($1.060 MM al 31-jul-2026) siguen un <b>modelo de capitalización de intereses</b>: el interés (12–20% anual) se acumula al capital y no genera salida de caja hasta los <b>abonos de capital trimestrales que comienzan en jun-2027</b> (ByS, Prisma, Futuro, Jumaka), salvo Pase y Deborah. Esto difiere la presión de caja al 2027–2029 pero incrementa el saldo adeudado mes a mes. El detalle cuota a cuota está en las hojas <i>Amort Socios</i> y <i>Flujo Socios</i> del maestro.</p>
+    <table id="socios"></table>
+  </div>
+
+
+  <h2><span class="n">06</span>Detalle de nuevas colocaciones por año</h2>
+  <div class="note">Créditos considerados en cada barra de la sección 01 (monto original, instituciones financieras). Incluye operaciones ya extinguidas para reflejar la deuda tomada en el período (ej. Levannta 3, Scotiabank refinanciados).</div>
+  <div id="det_coloc"></div>
+
+
+  <h2><span class="n">07</span>Detalle de pagos por año e institución</h2>
+  <div class="note">Capital amortizado e intereses efectivamente pagados (vencimiento ≤ 31-jul-2026), por institución financiera. Excluye préstamos de socios (capitalizan interés, sin salida de caja). Cifras en MM CLP.</div>
+  <div class="card"><div id="c_pagos"></div>
+    <div class="legend" style="margin-top:12px"><span><i class="sw" style="background:#2C5282"></i>Capital</span><span><i class="sw" style="background:#E8A33D"></i>Interés</span></div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const D = {"tomada": {"2023": 752, "2024": 835, "2025": 1222, "2026": 340}, "tomada_tipo": {"2024": {"Credito": 575, "Leaseback": 260, "Convenio": 0}, "2023": {"Credito": 350, "Leasing": 402}, "2025": {"Credito": 1156, "Leaseback": 66}, "2026": {"Credito": 340}}, "cap_year": {"2023": 136, "2024": 299, "2025": 1063, "2026": 610}, "int_year": {"2023": 43, "2024": 126, "2025": 319, "2026": 146}, "mat": {"2026": 384, "2027": 489, "2028": 308, "2029": 172, "2030": 78, "2031": 8}, "int_total": 875, "int_pagado": 634, "int_fut": 241, "cartera": {"Créditos bancarios": 1102, "Préstamos socios": 1060, "Leaseback": 210, "Leasing": 71, "Convenios TGR": 494}, "inst": {"Banco Estado": 571, "TGR": 494, "BCI (créd.+leaseback)": 462, "Banco Internacional": 181, "Levannta": 54, "Scotiabank": 44, "Eurocapital": 33, "HP Financial": 31, "Santander": 6}, "total_cartera": 2937};
+const fmt = n => n.toLocaleString('es-CL');
+const NS='http://www.w3.org/2000/svg';
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const C={Credito:'#1F3A5F',Leaseback:'#2E8B8B',Leasing:'#3BA7A7',Convenio:'#E8A33D',Socios:'#7E6BA8'};
+const TIPOC={'Créditos bancarios':'#1F3A5F','Préstamos socios':'#7E6BA8','Leaseback':'#2E8B8B','Leasing':'#3BA7A7','Convenios TGR':'#E8A33D'};
+
+// KPIs
+const totTaken2y = (D.tomada['2025']||0)+(D.tomada['2026']||0);
+const kpis=[
+ {v:'$'+fmt(D.total_cartera),l:'Deuda financiera vigente (MM CLP)',d:''},
+ {v:'$'+fmt(totTaken2y),l:'Tomado con bancos 2025–26 (MM)',d:''},
+ {v:'$'+fmt(D.int_pagado),l:'Intereses pagados a la fecha (MM)',d:''},
+ {v:'$'+fmt(D.int_fut),l:'Intereses por pagar comprometidos (MM)',d:''},
+ {v:'$'+fmt((D.mat['2026']||0)+(D.mat['2027']||0)),l:'Capital por vencer 2026–27 (MM)',d:''},
+];
+document.getElementById('kpis').innerHTML=kpis.map(k=>`<div class="kpi"><div class="v">${k.v}</div><div class="l">${k.l}</div></div>`).join('');
+document.getElementById('tot1').textContent=fmt(D.total_cartera);
+
+function axisMax(m){const p=Math.pow(10,Math.floor(Math.log10(m)));return Math.ceil(m/p*1.05)*p;}
+
+// Stacked vertical bars: tomada by tipo
+function stacked(el_id,leg_id,years,seriesMap,colors){
+  const W=Math.max(360,years.length*110),H=240,pad={l:44,r:12,t:12,b:34};
+  const totals=years.map(y=>Object.values(seriesMap[y]||{}).reduce((a,b)=>a+b,0));
+  const mx=axisMax(Math.max(...totals,1));
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H});
+  for(let i=0;i<=4;i++){const yv=mx*i/4,y=H-pad.b-(H-pad.b-pad.t)*(yv/mx);
+    svg.appendChild(el('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#eef1f6'}));
+    const t=el('text',{x:pad.l-6,y:y+3,'text-anchor':'end',fill:'#9aa4b2','font-size':10});t.textContent=fmt(Math.round(yv));svg.appendChild(t);}
+  const bw=Math.min(64,(W-pad.l-pad.r)/years.length*0.55);
+  years.forEach((y,i)=>{
+    const cx=pad.l+(W-pad.l-pad.r)*(i+0.5)/years.length; let acc=0;
+    const s=seriesMap[y]||{};
+    Object.keys(colors).forEach(k=>{ if(!s[k])return; const v=s[k];
+      const h=(H-pad.b-pad.t)*(v/mx), yy=H-pad.b-(H-pad.b-pad.t)*((acc+v)/mx);
+      svg.appendChild(el('rect',{x:cx-bw/2,y:yy,width:bw,height:h,fill:colors[k],rx:1.5}));
+      acc+=v;});
+    const tt=el('text',{x:cx,y:H-pad.b-(H-pad.b-pad.t)*(acc/mx)-5,'text-anchor':'middle',fill:'#1a2233','font-size':11,'font-weight':700});tt.textContent=fmt(Math.round(acc));svg.appendChild(tt);
+    const tx=el('text',{x:cx,y:H-12,'text-anchor':'middle',fill:'#6b7686','font-size':11});tx.textContent=y;svg.appendChild(tx);
+  });
+  document.getElementById(el_id).appendChild(svg);
+  if(leg_id){document.getElementById(leg_id).innerHTML=Object.keys(colors).map(k=>`<span><i class="sw" style="background:${colors[k]}"></i>${k}</span>`).join('');}
+}
+const tyears=Object.keys(D.tomada);
+stacked('c_tomada','leg_tomada',tyears,D.tomada_tipo,{Credito:C.Credito,Leaseback:C.Leaseback,Leasing:C.Leasing,Convenio:C.Convenio});
+
+// Grouped bars: capital vs interes
+function grouped(el_id,leg_id,years,a,b,la,lb,ca,cb){
+  const W=Math.max(360,years.length*110),H=230,pad={l:46,r:12,t:12,b:32};
+  const mx=axisMax(Math.max(...years.map(y=>Math.max(a[y]||0,b[y]||0)),1));
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H});
+  for(let i=0;i<=4;i++){const yv=mx*i/4,y=H-pad.b-(H-pad.b-pad.t)*(yv/mx);
+    svg.appendChild(el('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#eef1f6'}));
+    const t=el('text',{x:pad.l-6,y:y+3,'text-anchor':'end',fill:'#9aa4b2','font-size':10});t.textContent=fmt(Math.round(yv));svg.appendChild(t);}
+  const bw=Math.min(26,(W-pad.l-pad.r)/years.length*0.28);
+  years.forEach((y,i)=>{const cx=pad.l+(W-pad.l-pad.r)*(i+0.5)/years.length;
+    [[a[y]||0,ca,-bw*0.55],[b[y]||0,cb,bw*0.55]].forEach(([v,col,off])=>{
+      const h=(H-pad.b-pad.t)*(v/mx);svg.appendChild(el('rect',{x:cx+off-bw/2,y:H-pad.b-h,width:bw,height:h,fill:col,rx:1.5}));
+      const t=el('text',{x:cx+off,y:H-pad.b-h-4,'text-anchor':'middle',fill:'#5a6472','font-size':9.5});t.textContent=fmt(Math.round(v));svg.appendChild(t);});
+    const tx=el('text',{x:cx,y:H-11,'text-anchor':'middle',fill:'#6b7686','font-size':11});tx.textContent=y;svg.appendChild(tx);});
+  document.getElementById(el_id).appendChild(svg);
+  document.getElementById(leg_id).innerHTML=`<span><i class="sw" style="background:${ca}"></i>${la}</span><span><i class="sw" style="background:${cb}"></i>${lb}</span>`;
+}
+const syears=Object.keys(D.cap_year);
+grouped('c_serv','leg_serv',syears,D.cap_year,D.int_year,'Capital amortizado','Intereses pagados','#2C5282','#E8A33D');
+
+// Simple vertical bars: maturity
+function vbars(el_id,obj,color){
+  const years=Object.keys(obj),W=Math.max(340,years.length*70),H=230,pad={l:44,r:10,t:12,b:32};
+  const mx=axisMax(Math.max(...Object.values(obj),1));
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H});
+  for(let i=0;i<=4;i++){const yv=mx*i/4,y=H-pad.b-(H-pad.b-pad.t)*(yv/mx);
+    svg.appendChild(el('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#eef1f6'}));
+    const t=el('text',{x:pad.l-6,y:y+3,'text-anchor':'end',fill:'#9aa4b2','font-size':10});t.textContent=fmt(Math.round(yv));svg.appendChild(t);}
+  const bw=Math.min(46,(W-pad.l-pad.r)/years.length*0.6);
+  years.forEach((y,i)=>{const cx=pad.l+(W-pad.l-pad.r)*(i+0.5)/years.length,v=obj[y],h=(H-pad.b-pad.t)*(v/mx);
+    svg.appendChild(el('rect',{x:cx-bw/2,y:H-pad.b-h,width:bw,height:h,fill:color,rx:1.5}));
+    const t=el('text',{x:cx,y:H-pad.b-h-5,'text-anchor':'middle',fill:'#1a2233','font-size':10.5,'font-weight':700});t.textContent=fmt(v);svg.appendChild(t);
+    const tx=el('text',{x:cx,y:H-11,'text-anchor':'middle',fill:'#6b7686','font-size':10.5});tx.textContent=y;svg.appendChild(tx);});
+  document.getElementById(el_id).appendChild(svg);
+}
+vbars('c_mat',D.mat,'#2E8B8B');
+
+// Donut: cartera por tipo
+function donut(el_id,leg_id,obj,colors){
+  const H=230,cx=115,cy=115,r=88,ir=52,total=Object.values(obj).reduce((a,b)=>a+b,0);
+  const svg=el('svg',{viewBox:`0 0 340 ${H}`,width:'100%',height:H});
+  let ang=-Math.PI/2;
+  Object.entries(obj).forEach(([k,v])=>{const a2=ang+2*Math.PI*v/total;
+    const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    const xi2=cx+ir*Math.cos(a2),yi2=cy+ir*Math.sin(a2),xi1=cx+ir*Math.cos(ang),yi1=cy+ir*Math.sin(ang);
+    const large=(a2-ang)>Math.PI?1:0;
+    svg.appendChild(el('path',{d:`M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${xi2} ${yi2} A${ir} ${ir} 0 ${large} 0 ${xi1} ${yi1} Z`,fill:colors[k]}));
+    ang=a2;});
+  const t1=el('text',{x:cx,y:cy-4,'text-anchor':'middle',fill:'#1F3A5F','font-size':22,'font-weight':800});t1.textContent='$'+fmt(total);svg.appendChild(t1);
+  const t2=el('text',{x:cx,y:cy+14,'text-anchor':'middle',fill:'#6b7686','font-size':11});t2.textContent='MM CLP';svg.appendChild(t2);
+  document.getElementById(el_id).appendChild(svg);
+  document.getElementById(leg_id).innerHTML=Object.entries(obj).map(([k,v])=>`<span><i class="sw" style="background:${colors[k]}"></i>${k} · ${Math.round(v/total*100)}%</span>`).join('');
+}
+donut('c_tipo','leg_tipo',D.cartera,TIPOC);
+
+// Horizontal bars: instituciones
+function hbars(el_id,obj,color){
+  const keys=Object.keys(obj),W=360,rowh=26,H=keys.length*rowh+14,pad={l:132,r:44};
+  const mx=Math.max(...Object.values(obj));
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H});
+  keys.forEach((k,i)=>{const y=10+i*rowh,w=(W-pad.l-pad.r)*(obj[k]/mx);
+    const lb=el('text',{x:pad.l-8,y:y+12,'text-anchor':'end',fill:'#3a4453','font-size':11});lb.textContent=k;svg.appendChild(lb);
+    svg.appendChild(el('rect',{x:pad.l,y:y+2,width:Math.max(w,1),height:15,fill:color,rx:2}));
+    const v=el('text',{x:pad.l+Math.max(w,1)+5,y:y+14,fill:'#1a2233','font-size':10.5,'font-weight':700});v.textContent=fmt(obj[k]);svg.appendChild(v);});
+  document.getElementById(el_id).appendChild(svg);
+}
+hbars('c_inst',D.inst,'#2C5282');
+
+// Interest split (stacked horizontal)
+(function(){const pg=D.int_pagado,ft=D.int_fut,tot=pg+ft,W=360,H=90;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H});
+  const x0=10,w=W-20,wp=w*pg/tot;
+  svg.appendChild(el('rect',{x:x0,y:26,width:wp,height:30,fill:'#4C9A6B',rx:3}));
+  svg.appendChild(el('rect',{x:x0+wp,y:26,width:w-wp,height:30,fill:'#E8A33D',rx:3}));
+  const a=el('text',{x:x0+wp/2,y:46,'text-anchor':'middle',fill:'#fff','font-size':12,'font-weight':800});a.textContent='$'+fmt(pg);svg.appendChild(a);
+  const b=el('text',{x:x0+wp+(w-wp)/2,y:46,'text-anchor':'middle',fill:'#fff','font-size':12,'font-weight':800});b.textContent='$'+fmt(ft);svg.appendChild(b);
+  const tt=el('text',{x:x0,y:18,fill:'#6b7686','font-size':11});tt.textContent='Interés total vida: $'+fmt(tot)+' MM';svg.appendChild(tt);
+  document.getElementById('c_int').appendChild(svg);
+  document.getElementById('leg_int').innerHTML=`<span><i class="sw" style="background:#4C9A6B"></i>Pagado (${Math.round(pg/tot*100)}%)</span><span><i class="sw" style="background:#E8A33D"></i>Por pagar (${Math.round(ft/tot*100)}%)</span>`;
+})();
+
+document.getElementById('quick').innerHTML=`<ul style="list-style:none;font-size:12.5px;margin-top:8px">
+<li style="margin:7px 0">▸ El <b>72%</b> del costo financiero de los créditos con instituciones ya fue pagado.</li>
+<li style="margin:7px 0">▸ Quedan <b>$${fmt(D.int_fut)} MM</b> de intereses por devengar hacia adelante.</li>
+<li style="margin:7px 0">▸ La tasa promedio de los créditos bancarios ronda <b>10–13%</b> anual; socios <b>12–20%</b>.</li>
+</ul>`;
+
+document.getElementById('insights').innerHTML=[
+ `El <b>apalancamiento se aceleró en 2025</b>: se tomaron $${fmt(D.tomada['2025'])} MM en nuevas operaciones con instituciones (vs. $${fmt(D.tomada['2024'])} MM en 2024), concentradas en créditos Banco Estado y BCI. En paralelo, los socios aportaron financiamiento cuyo saldo vigente es ~$1.060 MM (ver detalle en sección 05).`,
+ `La <b>cartera vigente ($${fmt(D.total_cartera)} MM)</b> está repartida en 38% créditos bancarios, 36% préstamos de socios, 17% convenios TGR y 9% leasing/leaseback: dos terceras partes es deuda financiera tradicional.`,
+ `<b>Concentración de acreedores</b>: Banco Estado ($571 MM) + BCI ($462 MM) = 35% de la cartera. Conviene monitorear el riesgo de refinanciamiento y negociar condiciones a esa escala.`,
+ `<b>Presión de caja creciente</b>: vencen $${fmt(D.mat['2026'])} MM de capital en lo que resta de 2026 y $${fmt(D.mat['2027'])} MM en 2027 (instituciones), a lo que se suman los abonos de socios que arrancan en jun-2027 (~$1.274 MM en el ciclo). El 2027 es el año de mayor exigencia.`,
+ `El <b>diferimiento vía capitalización de socios</b> alivia la caja 2026 pero acumula costo (~15% anual sobre $1.060 MM ≈ $160 MM/año de interés capitalizado); recomendable evaluar prepagos parciales cuando la caja lo permita.`,
+ `<b>Calidad de datos</b>: 14 de 36 obligaciones aún no tienen respaldo escaneado (socios, Pase, Scotiabank, HP leasing, convenios TGR) — completar el respaldo fortalece la trazabilidad y la due diligence.`,
+].map(t=>`<li>${t}</li>`).join('');
+
+// socios table
+document.getElementById('socios').innerHTML=`<thead><tr><th>Entidad</th><th>Aporte (capital, MM)</th><th>Interés capitalizado (MM)</th><th>Total deuda jul-26 (MM)</th><th>Tasa anual</th><th>1er abono capital</th></tr></thead><tbody>
+<tr><td>ByS</td><td>461</td><td>59</td><td>521</td><td>15%</td><td>jun-2027</td></tr>
+<tr><td>Prisma</td><td>159</td><td>20</td><td>178</td><td>15%</td><td>jun-2027</td></tr>
+<tr><td>Futuro</td><td>115</td><td>12</td><td>128</td><td>15%</td><td>jun-2027</td></tr>
+<tr><td>Jumaka</td><td>137</td><td>3</td><td>140</td><td>12%</td><td>jun-2027</td></tr>
+<tr><td>Pase Inversiones I</td><td>45</td><td>0</td><td>45</td><td>20%</td><td>solo interés · bullet dic-26</td></tr>
+<tr><td>Pase Inversiones II (nuevo jun-26)</td><td>32</td><td>0</td><td>32</td><td>15%</td><td>solo interés · abierto</td></tr>
+<tr><td>Deborah Bendersky *</td><td>40</td><td>0</td><td>17</td><td>15%</td><td>amortiza</td></tr>
+<tr><td>Total socios</td><td>989</td><td>94</td><td>1.060</td><td>~15%</td><td>—</td></tr>
+</tbody>`;
+document.getElementById('socios').insertAdjacentHTML('afterend','<div class="chsub" style="margin-top:8px">Aporte = capital nominal prestado · Interés capitalizado = interés acumulado al capital (12–20% anual) · Total deuda = saldo vigente. Se recalcula cada mes con la capitalización (hojas <i>Amort Socios</i> / <i>Flujo Socios</i>). * Deborah amortiza capital, por eso su total es menor al aporte (aporte + int. capitalizado − amortización = total).</div>');
+
+document.getElementById('foot').textContent='Fuente: hoja «Base Obligaciones Financieras» (series históricas de capital e intereses) y «Resumen» actualizado al 31-jul-2026 (cartera vigente). Series de instituciones excluyen préstamos de socios, tratados en la sección 05. Elaborado por Claude para Netline.';
+
+// Detalle nuevas colocaciones
+const DET = {"2023": [{"n": "BCI III 350 7N", "b": "BCI", "e": "Netair", "t": "Credito", "m": 350, "mes": "jun"}, {"n": "Anillo (infraestructura)", "b": "Santander", "e": "Netair", "t": "Leasing", "m": 125, "mes": "ago"}, {"n": "Camion Capacho", "b": "Eurocapital", "e": "Netair", "t": "Leasing", "m": 116, "mes": "may"}, {"n": "HP (Servidores)", "b": "HP Financial", "e": "Netair", "t": "Leasing", "m": 94, "mes": "jul"}, {"n": "Servidor Voz", "b": "HP Financial", "e": "Netair", "t": "Leasing", "m": 67, "mes": "sep"}], "2024": [{"n": "BCI 4", "b": "BCI", "e": "Netair", "t": "Credito", "m": 200, "mes": "jun"}, {"n": "Bci 131002", "b": "BCI", "e": "Netair", "t": "Leaseback", "m": 141, "mes": "ago"}, {"n": "Enlaces Ceragon", "b": "BCI", "e": "Netair", "t": "Leaseback", "m": 120, "mes": "jun"}, {"n": "Credito Estado 36680601", "b": "Banco Estado", "e": "Mobile", "t": "Credito", "m": 75, "mes": "mar"}, {"n": "Credito Estado 37669057", "b": "Banco Estado", "e": "Mobile", "t": "Credito", "m": 75, "mes": "oct"}, {"n": "Fogape", "b": "Banco Estado", "e": "Carrier", "t": "Credito", "m": 75, "mes": "mar"}, {"n": "Credito Estado 36680304", "b": "Banco Estado", "e": "Local", "t": "Credito", "m": 75, "mes": "mar"}, {"n": "Credito Estado 37668380", "b": "Banco Estado", "e": "Local", "t": "Credito", "m": 75, "mes": "oct"}, {"n": "Scotiabank Carrier 1C", "b": "Scotiabank", "e": "Carrier", "t": "Credito", "m": 0, "mes": "ene"}, {"n": "Convenio TGR", "b": "TGR", "e": "Mobile", "t": "Convenio", "m": 0, "mes": "feb"}], "2025": [{"n": "Levannta 3 BCI", "b": "Levannta 3", "e": "Netair", "t": "Credito", "m": 300, "mes": "mar"}, {"n": "Crédito BCI 9077550003", "b": "BCI", "e": "Netair", "t": "Credito", "m": 250, "mes": "nov"}, {"n": "Levannta 1 BCI", "b": "Levannta 1", "e": "Netair", "t": "Credito", "m": 100, "mes": "ene"}, {"n": "Levannta 2 BCI", "b": "Levannta 2", "e": "Netair", "t": "Credito", "m": 100, "mes": "feb"}, {"n": "Credito Scotiabank 710156861585", "b": "Scotiabank", "e": "Mobile", "t": "Credito", "m": 100, "mes": "sep"}, {"n": "Credito Estado 38909048", "b": "Banco Estado", "e": "Fullcom", "t": "Credito", "m": 78, "mes": "jun"}, {"n": "Crédito Estado 39744114", "b": "Banco Estado", "e": "Fullcom", "t": "Credito", "m": 78, "mes": "dic"}, {"n": "Credito Estado 38584758", "b": "Banco Estado", "e": "Mobile", "t": "Credito", "m": 75, "mes": "abr"}, {"n": "Credito Estado 39374783", "b": "Banco Estado", "e": "Local", "t": "Credito", "m": 75, "mes": "oct"}, {"n": "Operación 134192", "b": "BCI", "e": "Netair", "t": "Leaseback", "m": 66, "mes": "ene"}], "2026": [{"n": "Crédito Internacional 10020285", "b": "Banco Internacional", "e": "Netair", "t": "Credito", "m": 195, "mes": "mar"}, {"n": "Crédito Estado 40433933", "b": "Banco Estado", "e": "Fullcom", "t": "Credito", "m": 75, "mes": "jul"}, {"n": "Credito Scotiabank 710163354745", "b": "Scotiabank", "e": "Mobile", "t": "Credito", "m": 51, "mes": "abr"}, {"n": "Credito Scotiabank 710163355857", "b": "Scotiabank", "e": "Mobile", "t": "Credito", "m": 19, "mes": "abr"}]};
+(function(){
+  const cont=document.getElementById('det_coloc'); if(!cont)return;
+  const TC={Credito:'#1F3A5F',Leaseback:'#2E8B8B',Leasing:'#3BA7A7',Convenio:'#E8A33D'};
+  Object.keys(DET).sort().forEach(y=>{
+    const items=DET[y]; const tot=items.reduce((a,d)=>a+d.m,0);
+    const card=document.createElement('div'); card.className='card'; card.style.marginBottom='16px';
+    let rows=items.map(d=>`<tr><td>${d.n}</td><td>${d.b}</td><td>${d.e}</td>
+      <td><span class="pill" style="background:${TC[d.t]||'#888'}">${d.t}</span></td>
+      <td>${d.mes||''}</td><td style="text-align:right">${d.m.toLocaleString('es-CL')}</td></tr>`).join('');
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:baseline">
+      <div class="chtitle">${y} — nuevas colocaciones</div>
+      <div style="font-weight:800;color:#1F3A5F">$${tot.toLocaleString('es-CL')} MM · ${items.length} créditos</div></div>
+      <table style="margin-top:8px"><thead><tr><th>Crédito (n° operación)</th><th>Institución</th><th>Empresa</th><th>Tipo</th><th>Mes</th><th style="text-align:right">Monto (MM)</th></tr></thead>
+      <tbody>${rows}<tr><td>Total ${y}</td><td></td><td></td><td></td><td></td><td style="text-align:right">${tot.toLocaleString('es-CL')}</td></tr></tbody></table>`;
+    cont.appendChild(card);
+  });
+})();
+
+
+// Detalle pagos por año/institución
+const PAGO = {"BCI": {"2023": [56, 29], "2024": [179, 64], "2025": [306, 66], "2026": [216, 31]}, "TGR": {"2023": [0, 0], "2024": [0, 1], "2025": [331, 99], "2026": [25, 32]}, "Levannta (BCI)": {"2023": [0, 0], "2024": [0, 0], "2025": [194, 78], "2026": [152, 28]}, "Banco Estado": {"2023": [0, 0], "2024": [31, 31], "2025": [83, 52], "2026": [71, 37]}, "HP Financial": {"2023": [27, 6], "2024": [37, 11], "2025": [41, 8], "2026": [26, 3]}, "Santander": {"2023": [34, 3], "2024": [30, 8], "2025": [34, 5], "2026": [21, 1]}, "Scotiabank": {"2023": [0, 0], "2024": [0, 0], "2025": [49, 3], "2026": [69, 5]}, "Eurocapital": {"2023": [19, 5], "2024": [22, 11], "2025": [23, 7], "2026": [16, 3]}, "Banco Internacional": {"2023": [0, 0], "2024": [0, 0], "2025": [0, 0], "2026": [14, 6]}, "Grenke": {"2023": [0, 0], "2024": [0, 0], "2025": [2, 1], "2026": [0, 0]}, "_years": [2023, 2024, 2025, 2026], "_total": {"2023": [136, 43], "2024": [299, 126], "2025": [1063, 319], "2026": [610, 146]}};
+(function(){
+  const cont=document.getElementById('c_pagos'); if(!cont)return;
+  const years=PAGO._years, insts=Object.keys(PAGO).filter(k=>!k.startsWith('_'));
+  const f=n=>n.toLocaleString('es-CL');
+  let h='<table style="font-size:12px"><thead>';
+  h+='<tr><th rowspan="2" style="vertical-align:bottom">Institución</th>';
+  years.forEach(y=>h+=`<th colspan="2" style="text-align:center;border-bottom:2px solid #1F3A5F">${y}</th>`);
+  h+='<th colspan="2" style="text-align:center;border-bottom:2px solid #2E8B8B">Total 2023–26</th></tr>';
+  h+='<tr>'; years.forEach(()=>h+='<th style="color:#2C5282">Cap.</th><th style="color:#E8A33D">Int.</th>');
+  h+='<th style="color:#2C5282">Cap.</th><th style="color:#E8A33D">Int.</th></tr></thead><tbody>';
+  insts.forEach(i=>{
+    let tc=0,ti=0; let row=`<tr><td>${i}</td>`;
+    years.forEach(y=>{const[c,n]=PAGO[i][y];tc+=c;ti+=n;
+      row+=`<td>${c?f(c):'–'}</td><td>${n?f(n):'–'}</td>`;});
+    row+=`<td style="font-weight:700">${f(tc)}</td><td style="font-weight:700">${f(ti)}</td></tr>`;
+    h+=row;
+  });
+  // totales
+  let TC=0,TI=0; h+='<tr><td>Total pagado</td>';
+  years.forEach(y=>{const[c,n]=PAGO._total[y];TC+=c;TI+=n;h+=`<td>${f(c)}</td><td>${f(n)}</td>`;});
+  h+=`<td>${f(TC)}</td><td>${f(TI)}</td></tr>`;
+  h+='</tbody></table>';
+  h+=`<div class="chsub" style="margin-top:10px">Total capital amortizado 2023–jul-2026: <b>$${f(TC)} MM</b> · Total intereses pagados: <b>$${f(TI)} MM</b> · Servicio de deuda total: <b>$${f(TC+TI)} MM</b>.</div>`;
+  cont.innerHTML=h;
+})();
+
+</script>
+</body>
+</html>
+
