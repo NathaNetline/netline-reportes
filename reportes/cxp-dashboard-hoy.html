@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netline — Dashboard de Cuentas por Pagar</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --navy2:#2C5282; --teal:#2E8B8B; --teal2:#3BA7A7;
+    --amber:#E8A33D; --green:#4C9A6B; --red:#C0504D; --violet:#7E6BA8;
+    --ink:#1a2233; --muted:#6b7686; --line:#e5e9f0; --bg:#f4f6f9; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;padding:32px 20px 60px}
+  .wrap{max-width:1160px;margin:0 auto}
+  header{border-bottom:3px solid var(--navy);padding-bottom:16px;margin-bottom:8px}
+  .eyebrow{color:var(--teal);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+  h1{font-size:30px;color:var(--navy);margin:4px 0 2px;font-weight:800;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13px}
+  h2{font-size:17px;color:var(--navy);margin:34px 0 4px;font-weight:750}
+  h2 .n{color:var(--teal);font-weight:800;margin-right:8px}
+  .note{color:var(--muted);font-size:12px;margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+  @media(min-width:900px){.kpis{grid-template-columns:repeat(6,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 16px 14px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  .kpi .v{font-size:24px;font-weight:800;color:var(--navy);letter-spacing:-.5px}
+  .kpi .l{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+  .kpi.warn .v{color:var(--red)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .grid2c{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}
+  @media(max-width:800px){.grid2,.grid2c{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .insights{background:linear-gradient(180deg,#fbfcfe,#f7f9fc);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:18px 22px;margin-top:10px}
+  .insights li{margin:9px 0 9px 2px;font-size:13.5px;list-style:none;padding-left:22px;position:relative}
+  .insights li:before{content:"▸";color:var(--teal);position:absolute;left:0;font-weight:800}
+  .insights b{color:var(--navy)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+  th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  .foot{color:var(--muted);font-size:11px;margin-top:30px;border-top:1px solid var(--line);padding-top:12px}
+  svg text{font-family:inherit}
+  .chtitle{font-size:13.5px;font-weight:750;color:var(--ink)}
+  .chsub{font-size:11.5px;color:var(--muted);margin-bottom:6px}
+  .pill{display:inline-block;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Netline · Dirección de Administración y Finanzas</div>
+    <h1>Dashboard de Cuentas por Pagar</h1>
+    <div class="sub">Consolidado del grupo (excluye saldos entre empresas relacionadas) · corte al 16-sep-2026 · cifras en miles de CLP (M$) salvo indicación</div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+  <div class="note" id="dpo_formula" style="margin-top:10px"></div>
+
+  <h2><span class="n">01</span>Antigüedad de saldos</h2>
+  <div class="note">Saldo pendiente por tramo de vencimiento, solo proveedores externos (se excluyen saldos entre empresas del grupo).</div>
+  <div class="card"><div class="chtitle">Saldo por tramo (M$)</div><div id="c_aging"></div></div>
+
+  <h2><span class="n">02</span>Top 10 proveedores con mayor atraso</h2>
+  <div class="note">Ordenados por saldo vencido (no incluye "por vencer"). Los días son el documento más atrasado de cada proveedor.</div>
+  <div class="card"><div id="t_top10"></div></div>
+
+  <h2><span class="n">03</span>Composición de la deuda</h2>
+  <div class="grid2c">
+    <div class="card"><div class="chtitle">Por clasificación (M$ · % del total)</div><div class="chsub">Total $<span id="tot_clasif"></span> M$</div><div id="c_clasif"></div><div class="legend" id="leg_clasif"></div></div>
+    <div class="card"><div class="chtitle">Por empresa del grupo (M$)</div><div id="c_empresa"></div></div>
+  </div>
+
+  <h2><span class="n">04</span>Contactos que son cliente y proveedor a la vez</h2>
+  <div class="note">Top 10 por exposición total (lo que nos deben + lo que les debemos). Típico en telco: interconexión con otros carriers.</div>
+  <div class="card"><div id="t_cruce"></div></div>
+
+  <h2><span class="n">05</span>Hallazgos y recomendaciones</h2>
+  <ul class="insights" id="insights"></ul>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const D = {"cutoff": "2026-09-16", "total_m": 1478063.0, "vencido_m": 1071061.0, "pct_vencido": 72.5, "dpo": 199.0, "backlog_antiguo_m": 167275.0, "costo_ventas_m": 1581311.0, "opex_proveedores_m": 1128316.0, "base_compras_m": 2709627.0, "convenio_m": 365682.6, "concentracion_top5": 47.1, "top10_vencidos": [{"proveedor": "Claro Chile SpA", "empresa": "FULLCOM TELECOMUNICACIONES LIMITADA", "saldo_m": 159836.6, "dias": 1094}, {"proveedor": "ENTEL PCS TELECOMUNICACIONES S.A.", "empresa": "NETLINE MULTICARRIER S.A.", "saldo_m": 106772.4, "dias": 61}, {"proveedor": "Gtd Teleductos S.A.", "empresa": "NETLINE TELECOMUNICACIONES CHILE LIMITADA", "saldo_m": 86101.4, "dias": 623}, {"proveedor": "Phoenix Tower International Chile", "empresa": "Netline Air Spa", "saldo_m": 57339.4, "dias": 203}, {"proveedor": "Telefonica Chile S.A.", "empresa": "FULLCOM TELECOMUNICACIONES LIMITADA", "saldo_m": 43481.8, "dias": 990}, {"proveedor": "Telefonica Moviles Chile S.A.", "empresa": "FULLCOM TELECOMUNICACIONES LIMITADA", "saldo_m": 35419.6, "dias": 736}, {"proveedor": "Seidor Chile S.A.", "empresa": "Netline Air Spa", "saldo_m": 31612.9, "dias": 247}, {"proveedor": "Ufinet Chile SpA", "empresa": "NETLINE TELECOMUNICACIONES CHILE LIMITADA", "saldo_m": 27205.0, "dias": 162}, {"proveedor": "Hp Financial Services (Chile) Limitada", "empresa": "Netline Air Spa", "saldo_m": 24408.5, "dias": 288}, {"proveedor": "Wom S.A.", "empresa": "FULLCOM TELECOMUNICACIONES LIMITADA", "saldo_m": 19821.2, "dias": 443}], "cliente_y_proveedor": [{"nombre": "Claro Chile SpA", "cxc_m": 340864.1, "dias_cxc": 400, "cxp_m": 191321.2, "dias_cxp": 1094}, {"nombre": "Wom S.A.", "cxc_m": 3812.4, "dias_cxc": 332, "cxp_m": 200004.6, "dias_cxp": 443}, {"nombre": "Gtd Teleductos S.A.", "cxc_m": 38729.3, "dias_cxc": 51, "cxp_m": 119053.0, "dias_cxp": 623}, {"nombre": "Entel Pcs Telecomunicaciones S.A.", "cxc_m": 6076.3, "dias_cxc": 365, "cxp_m": 140603.9, "dias_cxp": 121}, {"nombre": "Telefonica Chile S.A.", "cxc_m": 76037.8, "dias_cxc": 573, "cxp_m": 45466.2, "dias_cxp": 990}, {"nombre": "Transportes Doyom Ltda.", "cxc_m": 28862.8, "dias_cxc": null, "cxp_m": 18571.4, "dias_cxp": 551}, {"nombre": "Telefonica Moviles Chile S.A.", "cxc_m": 11270.5, "dias_cxc": 255, "cxp_m": 35089.0, "dias_cxp": 736}, {"nombre": "Comunicacion y Telefonia Rural-CTR", "cxc_m": 389.1, "dias_cxc": -5, "cxp_m": 37715.3, "dias_cxp": 667}, {"nombre": "Empresa Nacional De Telecomunicaciones S.A.", "cxc_m": 36594.0, "dias_cxc": 545, "cxp_m": 90.7, "dias_cxp": 112}, {"nombre": "Claro Comunicaciones SpA", "cxc_m": 31633.8, "dias_cxc": 238, "cxp_m": 8.3, "dias_cxp": 89}], "aging": {"Por vencer": 407002.1, "0 a 30": 246092.0, "31 a 60": 248256.6, "61 a 90": 122925.0, "91 a 120": 38562.7, "+120": 415224.8}, "por_clasificacion": {"TELCO": 544137.9, "EN CONVENIO": 365682.6, "OPERACION": 154197.8, "ARRIENDO": 140493.6, "INVERSION": 93169.8, "LICENCIAS": 72646.4, "OTROS": 37595.9, "GASTOS": 22731.7, "ASESORIAS": 21891.6, "SERVICIOS": 16832.6, "No clasificados": 15452.5, "RRHH": 14164.4, "MARKETING": 7395.2}, "por_empresa": {"Netline Air Spa": 746345.6, "NETLINE TELEFONICA LIMITADA": 507518.0, "NETLINE MOBILE S.A.": 118760.1, "NETLINE TELECOMUNICACIONES CHILE LIMITADA": 54918.6, "NETLINE MULTICARRIER S.A.": 18887.3, "FULLCOM TELECOMUNICACIONES LIMITADA": 18034.8, "AMEDUL S.A.": 13598.8}, "n_proveedores": 258, "n_documentos": 1713};
+const fmt = n => Math.round(n).toLocaleString('es-CL');
+const NS='http://www.w3.org/2000/svg';
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function axisMax(m){const p=Math.pow(10,Math.floor(Math.log10(Math.max(m,1))));return Math.ceil(m/p*1.05)*p;}
+
+// KPIs
+const kpis=[
+ {v:'$'+fmt(D.total_m),l:'CxP vigente externa (M$)'},
+ {v:D.pct_vencido+'%',l:'% del saldo vencido', warn: D.pct_vencido>25},
+ {v:fmt(D.dpo)+' días',l:'DPO estimado (CxP / Compras a proveedores 12m)', warn: D.dpo>120},
+ {v:'$'+fmt(D.backlog_antiguo_m),l:'Backlog +365 días vencido (M$)', warn: D.backlog_antiguo_m>0},
+ {v:D.n_proveedores,l:'Proveedores con saldo abierto'},
+ {v:D.concentracion_top5+'%',l:'Concentración top 5 proveedores'},
+];
+document.getElementById('kpis').innerHTML=kpis.map(k=>`<div class="kpi${k.warn?' warn':''}"><div class="v">${k.v}</div><div class="l">${k.l}</div></div>`).join('');
+document.getElementById('dpo_formula').innerHTML=`<b>Fórmula DPO</b>: CxP vigente ($${fmt(D.total_m)} M$) ÷ [Costo de Ventas ($${fmt(D.costo_ventas_m)} M$) + Gastos operacionales pagados a proveedores, excl. Remuneraciones ($${fmt(D.opex_proveedores_m)} M$)] × 365 días, sobre 12 meses a la fecha de corte. Base total de compras: $${fmt(D.base_compras_m)} M$.`;
+
+// 01 aging bars (color por severidad)
+(function(){
+  const order=["Por vencer","0 a 30","31 a 60","61 a 90","91 a 120","+120"];
+  const colors={"Por vencer":"#2E8B8B","0 a 30":"#3BA7A7","31 a 60":"#E8A33D","61 a 90":"#E8A33D","91 a 120":"#C0504D","+120":"#8B2E2E"};
+  const obj=order.filter(k=>k in D.aging).reduce((o,k)=>(o[k]=D.aging[k],o),{});
+  const keys=Object.keys(obj),W=Math.max(360,keys.length*110),H=240,pad={l:54,r:12,t:12,b:34};
+  const mx=axisMax(Math.max(...Object.values(obj),1));
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H});
+  for(let i=0;i<=4;i++){const yv=mx*i/4,y=H-pad.b-(H-pad.b-pad.t)*(yv/mx);
+    svg.appendChild(el('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#eef1f6'}));
+    const t=el('text',{x:pad.l-6,y:y+3,'text-anchor':'end',fill:'#9aa4b2','font-size':10});t.textContent=fmt(yv);svg.appendChild(t);}
+  const bw=Math.min(64,(W-pad.l-pad.r)/keys.length*0.55);
+  keys.forEach((k,i)=>{const cx=pad.l+(W-pad.l-pad.r)*(i+0.5)/keys.length,v=obj[k],h=(H-pad.b-pad.t)*(v/mx);
+    svg.appendChild(el('rect',{x:cx-bw/2,y:H-pad.b-h,width:bw,height:h,fill:colors[k]||'#2C5282',rx:2}));
+    const t=el('text',{x:cx,y:H-pad.b-h-6,'text-anchor':'middle',fill:'#1a2233','font-size':10.5,'font-weight':700});t.textContent=fmt(v);svg.appendChild(t);
+    const tx=el('text',{x:cx,y:H-12,'text-anchor':'middle',fill:'#6b7686','font-size':10.5});tx.textContent=k;svg.appendChild(tx);});
+  document.getElementById('c_aging').appendChild(svg);
+})();
+
+// 02 top10 table
+(function(){
+  const rows=D.top10_vencidos.map(r=>{
+    const sev = r.dias>120 ? '#C0504D' : (r.dias>60 ? '#E8A33D' : '#3BA7A7');
+    return `<tr><td>${r.proveedor}</td><td>${r.empresa}</td><td>${fmt(r.saldo_m)}</td><td><span class="pill" style="background:${sev}">${r.dias} días</span></td></tr>`;
+  }).join('');
+  document.getElementById('t_top10').innerHTML=`<table><thead><tr><th>Proveedor</th><th>Empresa</th><th>Saldo vencido (M$)</th><th>Atraso</th></tr></thead><tbody>${rows}</tbody></table>`;
+})();
+
+// 04 cliente y proveedor a la vez
+(function(){
+  const diaLbl = d => d===null||d===undefined ? '–' : (d+' días');
+  const rows=(D.cliente_y_proveedor||[]).map(r=>
+    `<tr><td>${r.nombre}</td><td>${fmt(r.cxc_m)}</td><td>${diaLbl(r.dias_cxc)}</td><td>${fmt(r.cxp_m)}</td><td>${diaLbl(r.dias_cxp)}</td></tr>`
+  ).join('');
+  document.getElementById('t_cruce').innerHTML=`<table><thead><tr><th>Contacto</th><th>Nos deben (CxC) M$</th><th>Días mora</th><th>Les debemos (CxP) M$</th><th>Días atraso</th></tr></thead><tbody>${rows}</tbody></table>`;
+})();
+
+// 03a donut clasificacion
+(function(){
+  const obj=D.por_clasificacion;
+  const palette=['#1F3A5F','#2E8B8B','#E8A33D','#7E6BA8','#4C9A6B','#C0504D','#3BA7A7','#2C5282','#9aa4b2','#B5651D','#5B6770','#8B2E2E','#A67C52'];
+  const keys=Object.keys(obj); const colors={}; keys.forEach((k,i)=>colors[k]=palette[i%palette.length]);
+  const total=Object.values(obj).reduce((a,b)=>a+b,0);
+  const H=230,cx=115,cy=115,r=88,ir=52;
+  const svg=el('svg',{viewBox:`0 0 340 ${H}`,width:'100%',height:H});
+  let ang=-Math.PI/2;
+  keys.forEach(k=>{const v=obj[k];const a2=ang+2*Math.PI*v/total;
+    const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    const xi2=cx+ir*Math.cos(a2),yi2=cy+ir*Math.sin(a2),xi1=cx+ir*Math.cos(ang),yi1=cy+ir*Math.sin(ang);
+    const large=(a2-ang)>Math.PI?1:0;
+    svg.appendChild(el('path',{d:`M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${xi2} ${yi2} A${ir} ${ir} 0 ${large} 0 ${xi1} ${yi1} Z`,fill:colors[k]}));
+    ang=a2;});
+  // el total mostrado usa D.total_m (el KPI oficial), no la suma de las cuñas:
+  // algunas categorias tienen notas de credito que compensan dentro del grupo,
+  // asi que la suma de |cada categoria| puede diferir un poco del neto total.
+  const totOficial=D.total_m;
+  const t1=el('text',{x:cx,y:cy-4,'text-anchor':'middle',fill:'#1F3A5F','font-size':20,'font-weight':800});t1.textContent='$'+fmt(totOficial);svg.appendChild(t1);
+  const t2=el('text',{x:cx,y:cy+14,'text-anchor':'middle',fill:'#6b7686','font-size':11});t2.textContent='M$';svg.appendChild(t2);
+  document.getElementById('c_clasif').appendChild(svg);
+  document.getElementById('tot_clasif').textContent=fmt(totOficial);
+  document.getElementById('leg_clasif').innerHTML=keys.map(k=>`<span><i class="sw" style="background:${colors[k]}"></i>${k} · ${Math.round(obj[k]/totOficial*100)}%</span>`).join('');
+})();
+
+// 03b hbars empresa
+(function(){
+  const obj=D.por_empresa, keys=Object.keys(obj),W=380,rowh=26,H=keys.length*rowh+14,pad={l:200,r:50};
+  const mx=Math.max(...Object.values(obj));
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H});
+  keys.forEach((k,i)=>{const y=10+i*rowh,w=(W-pad.l-pad.r)*(obj[k]/mx);
+    const lb=el('text',{x:pad.l-8,y:y+12,'text-anchor':'end',fill:'#3a4453','font-size':10.5});lb.textContent=k;svg.appendChild(lb);
+    svg.appendChild(el('rect',{x:pad.l,y:y+2,width:Math.max(w,1),height:15,fill:'#2C5282',rx:2}));
+    const v=el('text',{x:pad.l+Math.max(w,1)+5,y:y+14,fill:'#1a2233','font-size':10,'font-weight':700});v.textContent=fmt(obj[k]);svg.appendChild(v);});
+  document.getElementById('c_empresa').appendChild(svg);
+})();
+
+document.getElementById('insights').innerHTML=["El <b>DPO estimado es de 199 días</b> (CxP $1.478.063 M$ / compras a proveedores 12m $2.709.627 M$), muy por sobre un rango normal (30–90 días). Es consistente con la tensión de caja que ya se ve en el EERR (déficit proyectado, financiamiento con socios) — refleja que el grupo se está financiando en buena medida extendiendo plazos a proveedores.", "<b>1% de la deuda</b> ($15.452 M$) está \"No clasificada\" porque el proveedor no aparece en la hoja de clasificación de Finanzas — conviene ampliar esa hoja para tener visibilidad completa por categoría.", "<b>Concentración de proveedores</b>: los 5 más grandes representan el 47.1% de la deuda total — vale la pena gestionar activamente la relación de pago con ellos (ver Top 10).", "<b>Backlog histórico</b>: $167.275 M$ llevan más de 365 días vencidos — son candidatos a depurar, prescribir o renegociar en convenio.", "<b>Convenios de pago</b>: $365.683 M$ están en la cuenta de Proveedores en Convenio, es decir ya renegociados — se excluyen del riesgo de atraso \"nuevo\"."].map(t=>`<li>${t}</li>`).join('');
+document.getElementById('foot').textContent='Fuente: Odoo.sh (todas las empresas del grupo), saldo reconstruido a la fecha de corte (no es el saldo de hoy: se descuentan solo los pagos/conciliaciones registrados hasta esa fecha). Mismo alcance de cuentas y mismo total que el Excel de detalle de CxP. Clasificación de proveedores por hoja "CLASIFICACIÓN" de finanzas. DPO = CxP vigente / (Costo de Ventas + gastos operacionales pagados a proveedores, excluyendo remuneraciones) de los ultimos 12 meses, datos Odoo (puede diferir levemente de las cifras reconciliadas del EERR oficial). Elaborado por Claude para Netline · actualización mensual.';
+</script>
+</body>
+</html>
